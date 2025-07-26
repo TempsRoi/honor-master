@@ -22,14 +22,32 @@ const pageVariants: Variants = {
   },
 };
 
-const balanceVariants: Variants = {
-  initial: { scale: 1, color: "#ffffff" },
+// const balanceVariants: Variants = {
+//   initial: { scale: 1, color: "#ffffff" },
+//   highlight: {
+//     scale: [1, 1.25, 1],
+//     color: ["#ffffff", "#fef08a", "#ffffff"],
+//     transition: { duration: 0.5, ease: circOut },
+//   },
+// };
+
+
+//ChatGPTに修正してもらった箇所
+const balanceVariants = {
+  initial: {
+    scale: 1,
+    color: "#000",
+  },
   highlight: {
-    scale: [1, 1.25, 1],
-    color: ["#ffffff", "#fef08a", "#ffffff"],
-    transition: { duration: 0.5, ease: circOut },
+    scale: 1.2, // 単一値に変更
+    color: "#f00", // 単一値に変更
+    transition: {
+      duration: 0.5,
+      ease: [0.42, 0, 0.58, 1], // stringではなく Bezier 曲線
+    },
   },
 };
+
 
 export default function Home() {
   const { user, loading } = useAuth();
