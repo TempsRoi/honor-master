@@ -48,7 +48,6 @@ const balanceVariants = {
   },
 };
 
-
 export default function Home() {
   const { user, loading } = useAuth();
   const { paymentEffect } = useApp();
