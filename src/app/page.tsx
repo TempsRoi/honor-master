@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, circOut } from "framer-motion";
 import PaymentButton from "@/components/payment/PaymentButton";
 import RankingList from "@/components/ranking/RankingList";
 import Link from "next/link";
@@ -27,7 +27,7 @@ const balanceVariants: Variants = {
   highlight: {
     scale: [1, 1.25, 1],
     color: ["#ffffff", "#fef08a", "#ffffff"],
-    transition: { duration: 0.5, ease: "circOut" },
+    transition: { duration: 0.5, ease: circOut },
   },
 };
 
