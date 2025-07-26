@@ -1,0 +1,11 @@
+# Next.js build
+.next/
+
+# Node modules
+node_modules/
+
+# npm cache
+.npm_cache/
+
+# Local env files
+.env.local
