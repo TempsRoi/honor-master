@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import PaymentButton from "@/components/payment/PaymentButton";
 import RankingList from "@/components/ranking/RankingList";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaBolt } from "react-icons/fa";
 
-const pageVariants = {
+const pageVariants: Variants = {
   initial: { x: 0, scale: 1 },
   shake: { 
     x: [0, -8, 8, -8, 8, 0], 
@@ -22,7 +22,7 @@ const pageVariants = {
   },
 };
 
-const balanceVariants = {
+const balanceVariants: Variants = {
   initial: { scale: 1, color: "#ffffff" },
   highlight: {
     scale: [1, 1.25, 1],

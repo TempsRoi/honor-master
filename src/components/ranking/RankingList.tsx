@@ -30,9 +30,9 @@ const RankingList = () => {
     );
 };
 
-const RankingItem = ({ item }: { item: ReturnType<useRanking>['ranking'][0] }) => {
+const RankingItem = ({ item }: { item: ReturnType<typeof useRanking>['ranking'][0] }) => {
     const rank = item.rank;
-    const rankStyles = {
+    const rankStyles: { [key: number]: string } = {
         1: "border-yellow-400/80 bg-yellow-400/10 hover:bg-yellow-400/20",
         2: "border-slate-400/80 bg-slate-400/10 hover:bg-slate-400/20",
         3: "border-amber-600/80 bg-amber-600/10 hover:bg-amber-600/20",
