@@ -9,6 +9,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaBolt } from "react-icons/fa";
+import { easeInOut } from "framer-motion";
+
 
 const pageVariants: Variants = {
   initial: { x: 0, scale: 1 },
@@ -39,14 +41,15 @@ const balanceVariants = {
     color: "#000",
   },
   highlight: {
-    scale: 1.2, // 単一値に変更
-    color: "#f00", // 単一値に変更
+    scale: 1.2,
+    color: "#f00",
     transition: {
       duration: 0.5,
-      ease: [0.42, 0, 0.58, 1], // stringではなく Bezier 曲線
+      ease: easeInOut,
     },
   },
 };
+
 
 export default function Home() {
   const { user, loading } = useAuth();
