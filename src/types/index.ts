@@ -15,6 +15,7 @@ export interface RankingItem {
   totalPaid: number;
 }
 
+
 export interface PaymentHistory {
   id: string;
   amount: number;
