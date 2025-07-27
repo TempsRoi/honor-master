@@ -33,7 +33,6 @@ const pageVariants: Variants = {
 //   },
 // };
 
-
 //ChatGPTに修正してもらった箇所
 const balanceVariants = {
   initial: {
