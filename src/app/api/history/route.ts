@@ -27,11 +27,18 @@ export async function GET(req: Request) {
             return NextResponse.json([]);
         }
 
-        const history = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            timestamp: doc.data().timestamp.toDate(),
-        }));
+        // const history = snapshot.docs.map(doc => ({
+        //     id: doc.id,
+        //     ...doc.data(),
+        //     timestamp: doc.data().timestamp.toDate(),
+
+        const history = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate?.() ?? null,
+        }});
 
         return NextResponse.json(history);
 
