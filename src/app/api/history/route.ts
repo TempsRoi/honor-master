@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { MOCK_MODE } from '@/lib/mock';
 
+console.log("FIREBASE_SERVICE_ACCOUNT:", process.env.FIREBASE_SERVICE_ACCOUNT?.slice(0, 100));
+
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
