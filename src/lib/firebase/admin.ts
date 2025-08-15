@@ -16,6 +16,7 @@ try {
         }
         adminDb = admin.firestore();
         adminAuth = admin.auth();
+
     } else {
         // Provide dummy objects if initialization is skipped
         adminDb = {} as admin.firestore.Firestore;
