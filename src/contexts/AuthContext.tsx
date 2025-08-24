@@ -33,10 +33,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
   }, []);
 
-  const updateUserProfileState = useCallback((updates: Partial<UserProfile>) => {
-    setUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
-  }, []);
-
   useEffect(() => {
     const handleUser = async (fbUser: FirebaseUser | null) => {
       setFirebaseUser(fbUser);
