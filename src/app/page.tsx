@@ -117,7 +117,7 @@ export default function Home() {
               >
                 {displayBalance.toLocaleString()} <span className="text-lg text-muted-foreground">JPY</span> {/* Use displayBalance */}
               </motion.p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-lg text-muted-foreground mt-1">
                 Total Paid: {user.totalPaid.toLocaleString()} JPY
               </p>
             </div>
