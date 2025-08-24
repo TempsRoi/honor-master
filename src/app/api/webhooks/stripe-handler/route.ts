@@ -44,13 +44,17 @@ export async function POST(req: Request) {
                         const newUserProfile = {
                             uid: userId,
                             balance: amount,
-                            totalPaid: 0,
-                            // other fields should be populated from auth or have defaults
+                            totalPaid: amount, // Also update totalPaid on creation
                         };
                         transaction.set(userRef, newUserProfile);
                     } else {
-                        const newBalance = (userDoc.data()?.balance || 0) + amount;
-                        transaction.update(userRef, { balance: newBalance });
+                        const currentData = userDoc.data()!;
+                        const newBalance = (currentData.balance || 0) + amount;
+                        const newTotalPaid = (currentData.totalPaid || 0) + amount;
+                        transaction.update(userRef, { 
+                            balance: newBalance,
+                            totalPaid: newTotalPaid 
+                        });
                     }
 
                     // Record the charge in payment history
@@ -63,51 +67,7 @@ export async function POST(req: Request) {
                     });
                 });
 
-                console.log(`Successfully charged ${amount} for user ${userId}`);
-                console.log("--- DEBUG LOG START ---");
-                console.log("Received session:", JSON.stringify(session, null, 2));
-                console.log("Amount from Stripe:", amount);
-
-                // Use a transaction to safely update the balance
-                await adminDb.runTransaction(async (transaction) => {
-                    const userDoc = await transaction.get(userRef);
-                    
-                    console.log("User document exists:", userDoc.exists);
-                    if (userDoc.exists) {
-                        console.log("Current user data:", userDoc.data());
-                    }
-
-                    if (!userDoc.exists) {
-                        // This case should ideally not happen if user is created on first login
-                        // But as a fallback, we can create a new profile
-                        const newUserProfile = {
-                            uid: userId,
-                            balance: amount,
-                            totalPaid: amount, // Also update totalPaid on creation
-                        };
-                        console.log("Creating new user profile:", newUserProfile);
-                        transaction.set(userRef, newUserProfile);
-                    } else {
-                        const currentBalance = userDoc.data()?.balance || 0;
-                        const newBalance = currentBalance + amount;
-                        console.log(`Calculating new balance: ${currentBalance} + ${amount} = ${newBalance}`);
-                        transaction.update(userRef, { balance: newBalance });
-                    }
-
-                    // Record the charge in payment history
-                    const chargeRef = userRef.collection('payments').doc();
-                    const paymentData = {
-                        amount: amount,
-                        timestamp: firestore.FieldValue.serverTimestamp(),
-                        type: 'charge',
-                        stripeSessionId: session.id,
-                    };
-                    console.log("Recording payment history:", paymentData);
-                    transaction.set(chargeRef, paymentData);
-                });
-
-                console.log(`Transaction committed for user ${userId}`);
-                console.log("--- DEBUG LOG END ---");
+                console.log(`Successfully processed charge of ${amount} for user ${userId}`);
 
             } catch (dbError) {
                 console.error('Firestore update failed:', dbError);
