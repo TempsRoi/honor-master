@@ -126,6 +126,22 @@ const ChargePage = () => {
                 >
                     {isLoading ? "Processing..." : `Charge ${amountToCharge.toLocaleString()} JPY`}
                 </Button>
+
+                {isMockMode && ( // Only show reset button in mock mode
+                    <Button
+                        onClick={() => {
+                            if (user) {
+                                updateMockUser({ balance: 0, totalPaid: 0 });
+                                toast.info("Mock balance and total paid reset!");
+                                router.push('/');
+                            }
+                        }}
+                        variant="destructive"
+                        className="w-full py-4 mt-4 text-lg"
+                    >
+                        Reset Mock Balance
+                    </Button>
+                )}
             </motion.div>
         </div>
     );
