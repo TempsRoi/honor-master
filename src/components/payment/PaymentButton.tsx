@@ -11,7 +11,7 @@ import { FaYenSign } from 'react-icons/fa';
 import { useApp } from '@/contexts/AppContext';
 
 const PaymentButton = () => {
-    const { user, firebaseUser, updateMockUser } = useAuth();
+    const { user, firebaseUser, updateMockUser, updateUserProfileState } = useAuth();
     const { isMockMode, isBoostTime, triggerPaymentEffect } = useApp();
     const [amount, setAmount] = useState(PAYMENT_AMOUNTS.DEFAULT);
     const [isLoading, setIsLoading] = useState(false);
@@ -60,18 +60,35 @@ const PaymentButton = () => {
                     totalPaid: user.totalPaid + amount,
                 });
             } else {
-                const token = await firebaseUser.getIdToken();
-                const response = await fetch('/api/pay', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ userId: user.uid, amount }),
+                // Optimistic update
+                const previousBalance = user.balance;
+                const previousTotalPaid = user.totalPaid;
+                updateUserProfileState({
+                    balance: user.balance - amount,
+                    totalPaid: user.totalPaid + amount,
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || "Payment failed");
+                try {
+                    const token = await firebaseUser.getIdToken();
+                    const response = await fetch('/api/pay', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ userId: user.uid, amount }),
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Payment failed");
+                } catch (error) {
+                    // Revert optimistic update on error
+                    updateUserProfileState({
+                        balance: previousBalance,
+                        totalPaid: previousTotalPaid,
+                    });
+                    throw error; // Re-throw the error to be caught by the outer catch block
+                }
             }
 
             // Trigger payment effects

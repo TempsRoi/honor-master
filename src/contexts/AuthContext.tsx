@@ -13,6 +13,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   loading: boolean;
   updateMockUser: (updates: Partial<UserProfile>) => void;
+  updateUserProfileState: (updates: Partial<UserProfile>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +28,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!isMockMode || !user) return;
     setUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
   }, [isMockMode, user]);
+
+  const updateUserProfileState = useCallback((updates: Partial<UserProfile>) => {
+    setUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
+  }, []);
 
   useEffect(() => {
     const handleUser = async (fbUser: FirebaseUser | null) => {
@@ -77,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [isMockMode]);
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, updateMockUser }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, updateMockUser, updateUserProfileState }}>
       {children}
     </AuthContext.Provider>
   );
