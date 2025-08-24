@@ -53,25 +53,27 @@ export default function Home() {
   const { user, loading } = useAuth();
   const { paymentEffect, chargeEffect } = useApp(); // Get chargeEffect from useApp
 
+  const animatedBalance = useSpring(user?.balance || 0, { stiffness: 100, damping: 20 }); // Framer Motion spring for animation
   const [displayBalance, setDisplayBalance] = useState(user?.balance || 0); // State for displayed balance
-  const animatedBalance = useSpring(displayBalance, { stiffness: 100, damping: 20 }); // Framer Motion spring for animation
 
   useEffect(() => {
     if (user?.balance !== undefined) {
-      // If chargeEffect is active, animate quickly
-      if (chargeEffect === 'charge_success') {
-        animatedBalance.set(user.balance); // Set the target for the spring
-      } else {
-        // For other updates, just set the display balance directly or with a subtle animation
-        setDisplayBalance(user.balance);
-      }
+      animatedBalance.set(user.balance); // Always animate to the new user.balance
     }
-  }, [user?.balance, chargeEffect]); // Re-run when user.balance or chargeEffect changes
+  }, [user?.balance]); // Re-run when user.balance changes
 
   // Update displayBalance state when animatedBalance changes
   useMotionValueEvent(animatedBalance, "change", (latest) => {
     setDisplayBalance(Math.round(latest));
   });
+
+  // Initialize animatedBalance when user is first loaded
+  useEffect(() => {
+    if (!loading && user?.balance !== undefined) {
+      animatedBalance.set(user.balance);
+      setDisplayBalance(user.balance); // Set initial display balance without animation
+    }
+  }, [loading, user?.balance]); // Only run once when user is loaded
 
 
   if (loading) {
