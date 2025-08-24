@@ -37,11 +37,11 @@ const pageVariants: Variants = {
 const balanceVariants = {
   initial: {
     scale: 1,
-    color: "#000",
+    color: "#e5e7eb", // gray-200
   },
   highlight: {
-    scale: 1.2,
-    color: "#f00",
+    scale: [1, 1.25, 1],
+    color: ["#e5e7eb", "#fef08a", "#e5e7eb"], // gray-200, yellow-200, gray-200
     transition: {
       duration: 0.5,
       ease: easeInOut,
@@ -89,7 +89,7 @@ export default function Home() {
             <div>
               <p className="text-sm text-muted-foreground">BALANCE</p>
               <motion.p 
-                className="text-3xl font-bold"
+                className="text-3xl font-bold text-gray-100"
                 variants={balanceVariants}
                 animate={paymentEffect ? 'highlight' : 'initial'}
               >

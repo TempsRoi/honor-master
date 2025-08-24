@@ -35,7 +35,7 @@ export async function POST(req: Request) {
                 },
             ],
             mode: 'payment',
-            success_url: `${origin}/profile?charge_success=true`,
+            success_url: `${origin}/`,
             cancel_url: `${origin}/charge?charge_canceled=true`,
             metadata: {
                 userId: userId,
