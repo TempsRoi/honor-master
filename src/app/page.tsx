@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
-import { motion, Variants, circOut } from "framer-motion";
+import { motion, Variants, circOut, useSpring, useMotionValueEvent } from "framer-motion"; // Import useSpring and useMotionValueEvent
 import PaymentButton from "@/components/payment/PaymentButton";
 import RankingList from "@/components/ranking/RankingList";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaBolt } from "react-icons/fa";
 import { easeInOut } from "framer-motion";
+import { useEffect, useState } from "react"; // Import useEffect and useState
 
 
 const pageVariants: Variants = {
@@ -24,16 +25,6 @@ const pageVariants: Variants = {
   },
 };
 
-// const balanceVariants: Variants = {
-//   initial: { scale: 1, color: "#ffffff" },
-//   highlight: {
-//     scale: [1, 1.25, 1],
-//     color: ["#ffffff", "#fef08a", "#ffffff"],
-//     transition: { duration: 0.5, ease: circOut },
-//   },
-// };
-
-//ChatGPTに修正してもらった箇所
 const balanceVariants = {
   initial: {
     scale: 1,
@@ -47,12 +38,41 @@ const balanceVariants = {
       ease: easeInOut,
     },
   },
+  chargeHighlight: { // New variant for charge animation
+    scale: [1, 1.1, 1],
+    color: ["#e5e7eb", "#84cc16", "#e5e7eb"], // gray-200, lime-500, gray-200
+    transition: {
+      duration: 0.8, // Faster animation for charge
+      ease: easeInOut,
+    },
+  },
 };
 
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const { paymentEffect } = useApp();
+  const { paymentEffect, chargeEffect } = useApp(); // Get chargeEffect from useApp
+
+  const [displayBalance, setDisplayBalance] = useState(user?.balance || 0); // State for displayed balance
+  const animatedBalance = useSpring(displayBalance, { stiffness: 100, damping: 20 }); // Framer Motion spring for animation
+
+  useEffect(() => {
+    if (user?.balance !== undefined) {
+      // If chargeEffect is active, animate quickly
+      if (chargeEffect === 'charge_success') {
+        animatedBalance.set(user.balance); // Set the target for the spring
+      } else {
+        // For other updates, just set the display balance directly or with a subtle animation
+        setDisplayBalance(user.balance);
+      }
+    }
+  }, [user?.balance, chargeEffect]); // Re-run when user.balance or chargeEffect changes
+
+  // Update displayBalance state when animatedBalance changes
+  useMotionValueEvent(animatedBalance, "change", (latest) => {
+    setDisplayBalance(Math.round(latest));
+  });
+
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -91,9 +111,9 @@ export default function Home() {
               <motion.p 
                 className="text-3xl font-bold text-gray-100"
                 variants={balanceVariants}
-                animate={paymentEffect ? 'highlight' : 'initial'}
+                animate={chargeEffect === 'charge_success' ? 'chargeHighlight' : (paymentEffect ? 'highlight' : 'initial')}
               >
-                {user.balance.toLocaleString()} <span className="text-lg text-muted-foreground">JPY</span>
+                {displayBalance.toLocaleString()} <span className="text-lg text-muted-foreground">JPY</span> {/* Use displayBalance */}
               </motion.p>
               <p className="text-xs text-muted-foreground mt-1">
                 Total Paid: {user.totalPaid.toLocaleString()} JPY

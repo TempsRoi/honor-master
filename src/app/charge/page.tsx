@@ -14,7 +14,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 
 const ChargePage = () => {
     const { user, firebaseUser, updateMockUser } = useAuth();
-    const { isMockMode } = useApp();
+    const { isMockMode, triggerChargeEffect } = useApp(); // Destructure triggerChargeEffect
     const router = useRouter();
     const [selectedAmount, setSelectedAmount] = useState<number>(CHARGE_AMOUNTS[1]);
     const [customAmount, setCustomAmount] = useState<string>('');
@@ -42,6 +42,7 @@ const ChargePage = () => {
                     balance: user.balance + amount,
                 });
                 toast.success(`Mock charge of ${amount} JPY successful!`);
+                triggerChargeEffect('charge_success'); // Trigger charge effect
                 router.push('/');
             } else {
                 toast.info("Redirecting to payment page...");
