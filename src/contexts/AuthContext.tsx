@@ -3,10 +3,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase/config';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '@/types';
 import { useApp } from './AppContext';
 import { getMockUser, mockOnAuthStateChanged } from '@/lib/mock-auth';
+import { NameInputDialog } from '@/components/ui/NameInputDialog';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -14,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   updateMockUser: (updates: Partial<UserProfile>) => void;
   updateUserProfileState: (updates: Partial<UserProfile>) => void;
+  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
 
   const updateMockUser = useCallback((updates: Partial<UserProfile>) => {
     if (!isMockMode || !user) return;
@@ -33,6 +36,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(prevUser => prevUser ? { ...prevUser, ...updates } : null);
   }, []);
 
+  const updateUserProfile = async (updates: Partial<UserProfile>) => {
+    if (user) {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, updates);
+      // No need to call setUser here, onSnapshot will do it
+    }
+  };
+
+  const handleNameSubmit = async (displayName: string) => {
+    if (firebaseUser) {
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const newUserProfile: UserProfile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: displayName,
+        photoURL: firebaseUser.photoURL,
+        balance: 0,
+        totalPaid: 0,
+      };
+      await setDoc(userRef, newUserProfile);
+      setUser(newUserProfile);
+      setIsNameModalOpen(false);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const handleUser = async (fbUser: FirebaseUser | null) => {
       setFirebaseUser(fbUser);
@@ -41,19 +70,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const unsubscribe = onSnapshot(userRef, (snapshot) => {
           if (snapshot.exists()) {
             setUser(snapshot.data() as UserProfile);
+            setLoading(false);
           } else {
-            const newUserProfile: UserProfile = {
-              uid: fbUser.uid,
-              email: fbUser.email,
-              displayName: fbUser.displayName,
-              photoURL: fbUser.photoURL,
-              balance: 0,
-              totalPaid: 0,
-            };
-            setDoc(userRef, newUserProfile);
-            setUser(newUserProfile);
+            setIsNameModalOpen(true);
           }
-          setLoading(false);
         });
         return () => unsubscribe();
       } else {
@@ -82,8 +102,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [isMockMode]);
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, updateMockUser, updateUserProfileState }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, updateMockUser, updateUserProfileState, updateUserProfile }}>
       {children}
+      <NameInputDialog
+        isOpen={isNameModalOpen}
+        onSubmit={handleNameSubmit}
+        onClose={() => setIsNameModalOpen(false)} // Dummy function, as it shouldn't be closable by clicking outside
+        initialName={firebaseUser?.displayName || ''}
+      />
     </AuthContext.Provider>
   );
 };

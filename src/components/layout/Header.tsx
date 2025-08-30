@@ -56,12 +56,12 @@ const Header = () => {
             </div>
           ) : firebaseUser ? (
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground/80">{user?.displayName}</span>
-                {user?.photoURL && (
-                  <Image src={user.photoURL} alt={user.displayName || 'User'} width={40} height={40} className="rounded-full border-2 border-primary/50" />
-                )}
-              </div>
+                <Link href="/profile" className="flex items-center gap-3 cursor-pointer">
+                    <span className="text-sm font-medium text-foreground/80">{user?.displayName}</span>
+                    {user?.photoURL && (
+                    <Image src={user.photoURL} alt={user.displayName || 'User'} width={40} height={40} className="rounded-full border-2 border-primary/50" />
+                    )}
+                </Link>
               <Button onClick={handleSignOut} variant="secondary" size="sm">Sign Out</Button>
             </div>
           ) : (
