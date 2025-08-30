@@ -100,61 +100,67 @@ export default function Home() {
         </p>
       </motion.div>
 
-      {user ? (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="mt-12 flex flex-col items-center gap-8"
-        >
-          <div className="flex items-center justify-between w-full max-w-lg p-6 bg-card/80 border border-border rounded-2xl shadow-xl backdrop-blur-lg">
-            <div>
-              <p className="text-sm text-muted-foreground">BALANCE</p>
-              <motion.p 
-                className="text-3xl font-bold text-gray-100"
-                variants={balanceVariants}
-                animate={chargeEffect === 'charge_success' ? 'chargeHighlight' : (paymentEffect ? 'highlight' : 'initial')}
-              >
-                {displayBalance.toLocaleString()} <span className="text-lg text-muted-foreground">JPY</span> {/* Use displayBalance */}
-              </motion.p>
-              <p className="text-lg text-muted-foreground mt-1">
-                Total Paid: {user.totalPaid.toLocaleString()} JPY
-              </p>
-            </div>
-            <Button asChild size="lg" className="h-auto py-3 px-6 text-lg font-semibold">
-              <Link href="/charge">
-                <FaBolt className="mr-2 h-4 w-4" />
-                Charge
-              </Link>
-            </Button>
-          </div>
-          
-          <PaymentButton />
+      <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 items-start">
+        {/* Left Column */}
+        <div className="md:col-span-3 flex flex-col items-center gap-8">
+          {user ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="w-full flex flex-col items-center gap-8"
+            >
+              <div className="flex items-center justify-between w-full max-w-lg p-6 bg-card/80 border border-border rounded-2xl shadow-xl backdrop-blur-lg">
+                <div>
+                  <p className="text-sm text-muted-foreground">BALANCE</p>
+                  <motion.p 
+                    className="text-3xl font-bold text-gray-100"
+                    variants={balanceVariants}
+                    animate={chargeEffect === 'charge_success' ? 'chargeHighlight' : (paymentEffect ? 'highlight' : 'initial')}
+                  >
+                    {displayBalance.toLocaleString()} <span className="text-lg text-muted-foreground">JPY</span>
+                  </motion.p>
+                  <p className="text-lg text-muted-foreground mt-1">
+                    Total Paid: {user.totalPaid.toLocaleString()} JPY
+                  </p>
+                </div>
+                <Button asChild size="lg" className="h-auto py-3 px-6 text-lg font-semibold">
+                  <Link href="/charge">
+                    <FaBolt className="mr-2 h-4 w-4" />
+                    Charge
+                  </Link>
+                </Button>
+              </div>
+              
+              <PaymentButton />
 
-        </motion.div>
-      ) : (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mt-16 text-center flex flex-col items-center gap-4"
-        >
-          <p className="text-xl font-semibold">Log in to begin your ascent.</p>
-          <p className="text-muted-foreground">Join the ranks and immortalize your dedication.</p>
-        </motion.div>
-      )}
+            </motion.div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mt-16 text-center flex flex-col items-center gap-4"
+            >
+              <p className="text-xl font-semibold">Log in to begin your ascent.</p>
+              <p className="text-muted-foreground">Join the ranks and immortalize your dedication.</p>
+            </motion.div>
+          )}
+        </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="mt-24 md:mt-32"
-      >
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 bg-gradient-to-r from-primary to-white text-transparent bg-clip-text">
-            Real-time Honor Ranking
-        </h2>
-        <RankingList />
-      </motion.div>
+        {/* Right Column */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="md:col-span-2"
+        >
+          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-primary to-white text-transparent bg-clip-text">
+              Honor Ranking
+          </h2>
+          <RankingList />
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
