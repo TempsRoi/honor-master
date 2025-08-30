@@ -4,9 +4,16 @@ let adminDb: admin.firestore.Firestore;
 let adminAuth: admin.auth.Auth;
 
 try {
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-      : undefined;
+    const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT;
+    let serviceAccount: admin.ServiceAccount | undefined;
+
+    if (serviceAccountString) {
+        try {
+            serviceAccount = JSON.parse(serviceAccountString);
+        } catch (e) {
+            console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", e);
+        }
+    }
 
     if (serviceAccount) {
         if (!admin.apps.length) {
@@ -16,17 +23,15 @@ try {
         }
         adminDb = admin.firestore();
         adminAuth = admin.auth();
-
     } else {
-        // Provide dummy objects if initialization is skipped
+        if (process.env.NODE_ENV !== 'production') {
+            console.log("Firebase admin initialization skipped.");
+        }
         adminDb = {} as admin.firestore.Firestore;
         adminAuth = {} as admin.auth.Auth;
     }
 } catch (e: any) {
-    if (e.code !== 'app/invalid-credential') {
-        console.error('Firebase admin initialization error', e);
-    }
-    // Provide dummy objects if initialization fails (e.g., during build)
+    console.error('Firebase admin initialization error', e);
     adminDb = {} as admin.firestore.Firestore;
     adminAuth = {} as admin.auth.Auth;
 }
