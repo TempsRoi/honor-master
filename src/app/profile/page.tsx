@@ -6,13 +6,18 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { PaymentHistory } from '@/types';
 import { toast } from 'sonner';
-import { FaYenSign, FaPlusCircle } from 'react-icons/fa';
+import { FaYenSign, FaPlusCircle, FaEdit, FaArrowLeft } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
+import { NameInputDialog } from '@/components/ui/NameInputDialog';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const ProfilePage = () => {
-    const { user, loading } = useAuth();
+    const router = useRouter();
+    const { user, loading, updateUserProfile } = useAuth();
     const [history, setHistory] = useState<PaymentHistory[]>([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+    const [isNameModalOpen, setIsNameModalOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -35,6 +40,18 @@ const ProfilePage = () => {
         }
     }, [user]);
 
+    const handleNameChange = async (newName: string) => {
+        if (user && newName !== user.displayName) {
+            try {
+                await updateUserProfile({ displayName: newName });
+                toast.success('Display name updated successfully!');
+                setIsNameModalOpen(false);
+            } catch (error) {
+                toast.error('Failed to update display name.');
+            }
+        }
+    };
+
     if (loading) {
         return <div className="text-center p-10">Loading profile...</div>;
     }
@@ -44,72 +61,92 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12">
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col md:flex-row gap-8"
-            >
-                {/* Profile Card */}
-                <div className="md:w-1/3">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
-                        <Image
-                            src={user.photoURL || '/default-avatar.png'}
-                            alt={user.displayName || 'User'}
-                            width={128}
-                            height={128}
-                            className="rounded-full mx-auto mb-4 border-4 border-primary"
-                        />
-                        <h1 className="text-2xl font-bold">{user.displayName}</h1>
-                        <p className="text-muted-foreground">{user.email}</p>
-                        
-                        <div className="mt-6 text-left space-y-4">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Current Balance</p>
-                                <p className="text-2xl font-bold text-green-500">{user.balance.toLocaleString()} 円</p>
+        <>
+            <div className="container mx-auto px-4 py-12">
+                <Button variant="outline" onClick={() => router.back()} className="mb-4">
+                    <FaArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                </Button>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col md:flex-row gap-8"
+                >
+                    {/* Profile Card */}
+                    <div className="md:w-1/3">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
+                            <Image
+                                src={user.photoURL || '/default-avatar.png'}
+                                alt={user.displayName || 'User'}
+                                width={128}
+                                height={128}
+                                className="rounded-full mx-auto mb-4 border-4 border-primary"
+                            />
+                            <div className="flex justify-center items-center gap-2">
+                                <h1 className="text-2xl font-bold">{user.displayName}</h1>
+                                <Button variant="ghost" size="icon" onClick={() => setIsNameModalOpen(true)}>
+                                    <FaEdit className="h-5 w-5 text-muted-foreground" />
+                                </Button>
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total Honor Paid</p>
-                                <p className="text-2xl font-bold text-yellow-500">{user.totalPaid.toLocaleString()} 円</p>
+                            <p className="text-muted-foreground">{user.email}</p>
+                            
+                            <div className="mt-6 text-left space-y-4">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Current Balance</p>
+                                    <p className="text-2xl font-bold text-green-500">{user.balance.toLocaleString()} 円</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Total Honor Paid</p>
+                                    <p className="text-2xl font-bold text-yellow-500">{user.totalPaid.toLocaleString()} 円</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Payment History */}
-                <div className="md:w-2/3">
-                    <h2 className="text-2xl font-bold mb-4">Payment History</h2>
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 max-h-[600px] overflow-y-auto">
-                        {isHistoryLoading ? (
-                            <p>Loading history...</p>
-                        ) : history.length > 0 ? (
-                            <ul className="space-y-4">
-                                {history.map(item => (
-                                    <li key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                        <div className="flex items-center">
-                                            {item.type === 'charge' ? (
-                                                <FaPlusCircle className="text-green-500 mr-3 text-xl" />
-                                            ) : (
-                                                <FaYenSign className="text-red-500 mr-3 text-xl" />
-                                            )}
-                                            <div>
-                                                <p className="font-semibold capitalize">{item.type}</p>
-                                                <p className="text-sm text-muted-foreground">{new Date(item.timestamp).toLocaleString()}</p>
+                    {/* Payment History */}
+                    <div className="md:w-2/3">
+                        <h2 className="text-2xl font-bold mb-4">Payment History</h2>
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 max-h-[600px] overflow-y-auto">
+                            {isHistoryLoading ? (
+                                <p>Loading history...</p>
+                            ) : history.length > 0 ? (
+                                <ul className="space-y-4">
+                                    {history.map(item => (
+                                        <li key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                            <div className="flex items-center">
+                                                {item.type === 'charge' ? (
+                                                    <FaPlusCircle className="text-green-500 mr-3 text-xl" />
+                                                ) : (
+                                                    <FaYenSign className="text-red-500 mr-3 text-xl" />
+                                                )}
+                                                <div>
+                                                    <p className="font-semibold capitalize">{item.type}</p>
+                                                    <p className="text-sm text-muted-foreground">{new Date(item.timestamp).toLocaleString()}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <p className={cn("font-bold text-lg", item.type === 'charge' ? 'text-green-500' : 'text-red-500')}>
-                                            {item.type === 'charge' ? '+' : '-'} {item.amount.toLocaleString()} 円
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-center text-muted-foreground py-8">No payment history found.</p>
-                        )}
+                                            <p className={cn("font-bold text-lg", item.type === 'charge' ? 'text-green-500' : 'text-red-500')}>
+                                                {item.type === 'charge' ? '+' : '-'} {item.amount.toLocaleString()} 円
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-center text-muted-foreground py-8">No payment history found.</p>
+                            )}
+                        </div>
                     </div>
-                </div>
-            </motion.div>
-        </div>
+                </motion.div>
+            </div>
+            <NameInputDialog
+                isOpen={isNameModalOpen}
+                onSubmit={handleNameChange}
+                onClose={() => setIsNameModalOpen(false)}
+                initialName={user.displayName || ''}
+                title="Edit Display Name"
+                description="Enter your new display name below."
+                submitButtonText="Update Name"
+            />
+        </>
     );
 };
 
