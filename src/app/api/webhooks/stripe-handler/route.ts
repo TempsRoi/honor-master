@@ -44,16 +44,14 @@ export async function POST(req: Request) {
                         const newUserProfile = {
                             uid: userId,
                             balance: amount,
-                            totalPaid: amount, // Also update totalPaid on creation
+                            totalPaid: 0, // totalPaid should be 0 on creation
                         };
                         transaction.set(userRef, newUserProfile);
                     } else {
                         const currentData = userDoc.data()!;
                         const newBalance = (currentData.balance || 0) + amount;
-                        const newTotalPaid = (currentData.totalPaid || 0) + amount;
                         transaction.update(userRef, { 
                             balance: newBalance,
-                            totalPaid: newTotalPaid 
                         });
                     }
 
