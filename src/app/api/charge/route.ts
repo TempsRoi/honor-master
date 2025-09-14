@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/config';
-import { getStripeJs } from '@/lib/stripe/client';
 import { headers } from 'next/headers';
-import { MOCK_MODE } from '@/lib/mock';
 
 export async function POST(req: Request) {
     const { amount, userId } = await req.json();
@@ -12,9 +10,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'User ID and amount are required.' }, { status: 400 });
     }
 
-    if (MOCK_MODE) {
+    // Check for mock mode using environment variable on the server-side
+    if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
         // In mock mode, we just pretend a charge was successful.
-        // In a real scenario, you might want a mock checkout page.
         return NextResponse.json({ sessionId: 'cs_test_mock' });
     }
 
