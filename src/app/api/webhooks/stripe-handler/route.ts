@@ -78,3 +78,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
 }
+
+// Next.js の App Router で body の raw データを使うには必要
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
